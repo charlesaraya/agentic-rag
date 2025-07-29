@@ -1,0 +1,10 @@
+.env
+__pycache__/
+*.py[cod]
+.langgraph
+*.pckl
+*.db
+*.db-shm
+*.db-wal
+*.rdb
+Makefile
