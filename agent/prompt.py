@@ -15,6 +15,14 @@ If the document contains keyword(s) or semantic meaning related to the user ques
 Give a binary score 'yes' or 'no' score to indicate whether the document is relevant to the question.
 """
 
+REWRITE_PROMPT = """Look at the input and try to reason about the underlying semantic intent / meaning.
+Here is the initial question:
+-------
+{question}
+-------
+Formulate an improved question:
+"""
+
 GENERATE_PROMPT = """You are an assistant for question-answering tasks.
 Use the following pieces of retrieved context to answer the question.
 If you don't know the answer, just say that you don't know.
