@@ -1,3 +1,4 @@
+from typing import List
 from pydantic import BaseModel, Field
 
 from langgraph.graph import MessagesState
@@ -11,6 +12,7 @@ class GraphState(MessagesState):
         context: retrieved context related to the question
     """
     question: str
+    documents: List[str]
     context: str
 
 
