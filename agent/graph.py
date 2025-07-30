@@ -9,8 +9,8 @@ from langchain.tools.retriever import create_retriever_tool
 
 import app.config as config
 from agent.rag import init_rag
-from agent.state import State, GradeDocuments
-from agent.prompt import RETRIEVER_SYS_PROMPT, GRADE_PROMPT, GENERATE_PROMPT, REWRITE_PROMPT
+from agent.state import GraphState, GradeDocuments
+import agent.prompt as prompts
 
 llm = config.get_llm()
 
@@ -21,24 +21,24 @@ retriever_tool = create_retriever_tool(
         "Search and return information about Lilian Weng blog posts.",
     )
 
-def generate_query_or_respond(state: State):
+def generate_query_or_respond(state: GraphState):
     """Call the model to generate a response based on the current state.
 
     Given the question, it will decide to retrieve using the retriever tool, or simply respond to the user.
     """
     question = state.get("question", state["messages"][0].content)
     prompt = ChatPromptTemplate.from_messages([
-        ("system", RETRIEVER_SYS_PROMPT),
+        ("system", prompts.RETRIEVER_SYS_PROMPT),
         ("placeholder", "{messages}"),
     ])
     chain = prompt | llm.bind_tools([retriever_tool])
     response = chain.invoke(state)
     return {"messages": [response], "question": question}
 
-def grade_retrieved_documents(state: State) -> str:
+def grade_retrieved_documents(state: GraphState) -> str:
     """Determine whether the retrieved documents are relevant to the question."""
     context = state["messages"][-1].content
-    grader_prompt = GRADE_PROMPT.format(context=context)
+    grader_prompt = prompts.GRADE_PROMPT.format(context=context)
     prompt = ChatPromptTemplate.from_messages([
         ("system", grader_prompt),
         ("human", "{question}"),
@@ -53,11 +53,11 @@ def grade_retrieved_documents(state: State) -> str:
     else:
         return "rewrite_question"
 
-def generate_answer(state: State):
+def generate_answer(state: GraphState):
     """Generate an answer."""
     state["context"] = state["messages"][-1].content
     prompt = ChatPromptTemplate.from_messages([
-        ("system", GENERATE_PROMPT),
+        ("system", prompts.GENERATE_PROMPT),
         ("human", "{question}"),
     ])
     chain = prompt | llm
@@ -65,11 +65,11 @@ def generate_answer(state: State):
 
     return {"messages": [response]}
 
-def rewrite_question(state: State):
-    """Rewrite the original user question."""
+def rewrite_question(state: GraphState):
+    """Rewrite the original user question to improve it."""
     state["context"] = state["messages"][-1].content
     prompt = ChatPromptTemplate.from_messages([
-        ("system", REWRITE_PROMPT),
+        ("system", prompts.REWRITE_PROMPT),
         ("human", "{question}"),
     ])
     chain = prompt | llm
@@ -78,7 +78,7 @@ def rewrite_question(state: State):
     return {"messages": [response], "question": question}
 
 def build_graph():
-    graph_builder = StateGraph(State)
+    graph_builder = StateGraph(GraphState)
 
     # Nodes
     graph_builder.add_node("generate_query_or_respond", generate_query_or_respond)

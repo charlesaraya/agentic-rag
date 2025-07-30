@@ -2,7 +2,14 @@ from pydantic import BaseModel, Field
 
 from langgraph.graph import MessagesState
 
-class State(MessagesState):
+class GraphState(MessagesState):
+    """
+    Represents the state of the graph.
+
+    Attributes:
+        question: user question
+        context: retrieved context related to the question
+    """
     question: str
     context: str
 
