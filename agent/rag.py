@@ -8,6 +8,9 @@ def init_rag():
         "https://lilianweng.github.io/posts/2024-11-28-reward-hacking/",
         "https://lilianweng.github.io/posts/2024-07-07-hallucination/",
         "https://lilianweng.github.io/posts/2024-04-12-diffusion-video/",
+        "https://lilianweng.github.io/posts/2023-06-23-agent/",
+        "https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/",
+        "https://lilianweng.github.io/posts/2023-10-25-adv-attack-llm/",
     ]
 
     docs = [WebBaseLoader(url).load() for url in urls]
