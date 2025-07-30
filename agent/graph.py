@@ -35,8 +35,6 @@ def generate_query_or_respond(state: State):
     response = chain.invoke(state)
     return {"messages": [response], "question": question}
 
-grader_llm = config.get_llm()
-
 def grade_retrieved_documents(state: State) -> str:
     """Determine whether the retrieved documents are relevant to the question."""
     context = state["messages"][-1].content
@@ -45,7 +43,7 @@ def grade_retrieved_documents(state: State) -> str:
         ("system", grader_prompt),
         ("human", "{question}"),
     ])
-    chain = prompt | grader_llm.with_structured_output(GradeDocuments)
+    chain = prompt | llm.with_structured_output(GradeDocuments)
 
     response = chain.invoke(state)
     score = response.binary_score
