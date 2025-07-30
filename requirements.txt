@@ -4,6 +4,7 @@ langgraph
 langchain-core
 langchain-openai
 langgraph-checkpoint-sqlite
+chromadb
 
 python-dotenv
 langsmith
