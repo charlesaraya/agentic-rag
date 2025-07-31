@@ -3,9 +3,6 @@ import os
 from sqlmodel import create_engine, Session
 from sqlalchemy import event
 
-from dotenv import load_dotenv
-load_dotenv()
-
 sqlite_file = os.environ.get("SQLITE_DB_NAME")
 engine = create_engine(f"sqlite:///{sqlite_file}", echo=True)
 

@@ -5,9 +5,6 @@ from fastapi.staticfiles import StaticFiles
 
 from starlette.middleware.sessions import SessionMiddleware
 
-from dotenv import load_dotenv
-load_dotenv()
-
 from app.routes import router
 
 def create_app() -> FastAPI:
