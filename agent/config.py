@@ -1,12 +1,9 @@
 import os
 import sqlite3
 
-from dotenv import load_dotenv
-load_dotenv()
-
 from langchain.chat_models import init_chat_model
 from langgraph.checkpoint.sqlite import SqliteSaver
-from langchain_community.tools.tavily_search import TavilySearchResults
+from langchain_tavily import TavilySearch
 
 def get_llm():
     llm_name = os.environ.get("LLM_NAME")
@@ -25,7 +22,7 @@ def get_search_tool():
     if not llm_name:
         raise ValueError("failed to load TAVILY_API_KEY env")
 
-    return TavilySearchResults(k=3)
+    return TavilySearch(max_results=5)
 
 
 def get_agent_memory():
