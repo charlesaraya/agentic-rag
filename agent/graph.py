@@ -3,16 +3,26 @@ from langchain_core.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.schema import Document
 
-import app.config as config
-from agent.rag import init_rag
+import agent.config as config
 from agent.state import GraphState, GradeDocuments
 import agent.prompt as prompts
+
+import vectorstore
 
 llm = config.get_llm()
 
 web_search_tool = config.get_search_tool()
 
-retriever = init_rag()
+urls = [
+    "https://lilianweng.github.io/posts/2024-11-28-reward-hacking/",
+    "https://lilianweng.github.io/posts/2024-07-07-hallucination/",
+    "https://lilianweng.github.io/posts/2024-04-12-diffusion-video/",
+    "https://lilianweng.github.io/posts/2023-06-23-agent/",
+    "https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/",
+    "https://lilianweng.github.io/posts/2023-10-25-adv-attack-llm/",
+]
+vectorstore.ingest_documents(urls)
+retriever = vectorstore.get_retriever()
 
 def grade_retrieved_documents(state: GraphState):
     """Determine whether the retrieved documents are relevant to the question."""
@@ -72,7 +82,7 @@ def web_search(state: GraphState):
     search_results = web_search_tool.invoke({"query": state["question"]})
     documents = list(map(lambda doc: Document(
         page_content = doc["content"],
-        metadata = {"source": doc["url"], "title": doc["title"]}), search_results))
+        metadata = {"source": doc["url"], "title": doc["title"]}), search_results["results"]))
     return {"documents": documents}
 
 def generate_or_search(state: GraphState) -> str:

@@ -1,8 +1,10 @@
 langchain
 langchain_community
+langchain-tavily
 langgraph
 langchain-core
 langchain-openai
+langchain-chroma
 langgraph-checkpoint-sqlite
 chromadb
 

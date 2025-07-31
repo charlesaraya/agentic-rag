@@ -2,6 +2,8 @@
 __pycache__/
 *.py[cod]
 .langgraph
+db
+agent/memory
 *.pckl
 *.db
 *.db-shm
