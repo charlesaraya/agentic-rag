@@ -25,3 +25,10 @@ Use three sentences maximum and keep the answer concise.
 
 Context: {context}
 """
+
+HALLUCINATION_PROMPT = """You are a grader assessing whether an LLM generation is grounded in or supported by a set of retrieved facts.
+Facts: {context}
+
+LLM generation: {generation}
+
+Give a binary score 'yes' or 'no' score to indicate whether the generation is grounded in or supported by the set of retrieved facts."""

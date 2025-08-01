@@ -4,7 +4,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain.schema import Document
 
 import agent.config as config
-from agent.state import GraphState, GradeDocuments
+from agent.state import GraphState, GradeDocuments, GradeHallucinations
 import agent.prompt as prompts
 
 import vectorstore
@@ -45,6 +45,20 @@ def grade_retrieved_documents(state: GraphState):
             continue
     return {"documents": filtered_docs, "question": question}
 
+def grade_generation(state: GraphState) -> str:
+    """Determine whether an LLM generation is grounded in or supported by retrieved facts."""
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", prompts.HALLUCINATION_PROMPT),
+    ])
+    chain = prompt | llm.with_structured_output(GradeHallucinations)
+    response = chain.invoke(state)
+    score = response.binary_score
+
+    if score == "yes":
+        return "supported"
+    else:
+        return "not supported"
+
 def generate_answer(state: GraphState):
     """Generate an answer."""
     documents = state["documents"]
@@ -56,8 +70,8 @@ def generate_answer(state: GraphState):
     ])
     chain = prompt | llm
     response = chain.invoke(state)
-
-    return {"messages": [response]}
+    generation = response.content
+    return {"messages": [response], "generation": generation}
 
 def rewrite_question(state: GraphState):
     """Rewrite the original user question to improve it."""
@@ -109,7 +123,7 @@ def build_graph():
     graph_builder.add_edge("retrieve", "grade_retrieved_documents")
     graph_builder.add_conditional_edges("grade_retrieved_documents", generate_or_search, ["generate_answer", "web_search"])
     graph_builder.add_edge("web_search", "grade_retrieved_documents")
-    graph_builder.add_edge("generate_answer", END)
+    graph_builder.add_conditional_edges("generate_answer", grade_generation, {"supported": END, "not supported": "generate_answer"},)
 
     # Short-term (within-thread) memory
     #memory = config.get_agent_memory()
